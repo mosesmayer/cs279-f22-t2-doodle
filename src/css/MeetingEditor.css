@@ -1,0 +1,18 @@
+.MeetingEditor {
+    width: 60%;
+    margin: auto;
+    padding: 50px;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
+
+.meeting-title,
+.meeting-location {
+    width: 100%;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
+
+.meeting-description {
+    height: 42px;
+    width: 100%;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
