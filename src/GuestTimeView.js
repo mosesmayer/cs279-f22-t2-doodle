@@ -233,7 +233,7 @@ class MeetingOption extends React.Component {
         newstate.selected = (newstate.selected + 1) % 3;
         this.setState(newstate);
         // console.log(newstate);
-        this.forceUpdate();
+        this.forceUpdate(); // force an update to update component CSS
     }
 
     render() {
@@ -244,10 +244,11 @@ class MeetingOption extends React.Component {
             >
                 <div style={{
                     ...meetingOptionStyles[this.state.selected * 2 + this.state.hover].style,
-                    border: "1px solid black", borderRadius: "7px",
+                    border: "1px solid black", borderRadius: "7px", // adding borders just for visual clarity
                     userSelect: "none"
                 }}
                     className={'timeComponent ' + ["mtg-cannot", "mtg-can", "mtg-maybe"][this.state.selected]}>
+                    {/* Meeting details */}
                     <div style={{ padding: "10px 10px 15px 10px" }}>
                         <p className={'day-month-header'}>{this.state.time.day}</p>
                         <p className={'date-header'}>{this.state.time.date}</p>
@@ -256,6 +257,7 @@ class MeetingOption extends React.Component {
                         <p>{pad2(this.state.time.startTime.hours)}:{pad2(this.state.time.startTime.minutes)} {this.state.time.startTime.am ? "AM" : "PM"}</p>
                         <p>{pad2(this.state.time.finishTime.hours)}:{pad2(this.state.time.finishTime.minutes)} {this.state.time.finishTime.am ? "AM" : "PM"}</p>
                     </div>
+                    {/* Icon-in-box indicator for selecting a meeting time */}
                     <div style={{ width: "100%", alignItems: "center", margin: "0 auto", display: "flex" }}>
                         <span style={{
                             background: "white", color: meetingOptionStyles[this.state.selected * 2 + this.state.hover].style.color,
@@ -395,3 +397,19 @@ function GuestTimeView() { // using functional component to use useState hook
 }
 
 export default GuestTimeView;
+
+
+/**
+ * TLDR:
+ * GuestTimeView is our final component. It is built of two divs, one for
+ * displaying event metadata and one more for the schedulign tool itself
+ * 
+ * In the scheduling tool we implement using rows -- one for the new entry, and
+ * one for each existing entry of availability. Each event is represented as a
+ * 'column', where we lay out existing availabilities (using icons and colors)
+ * and allow the user to select the ones they want.
+ * 
+ * Confirmation is indicated via a popup as opposed to a new screen for simplicity
+ * (the key concept here is that we have a means of recording the new user's
+ * details and then confirming that they have submitted)
+ */
