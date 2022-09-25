@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import "./css/GuestTimeView.css"
 import { DefaultMeetingTimeOptions, DefaultAvailability } from "./TIMEOPTIONS";
 
+// Pads '9' to '09' for displaying hours/minutes well
 function pad2(num) {
     return (num < 10 ? '0' : '') + num;
 }
 
+// Doodle color scheme
 const ICON_COLORS = {
     bg_green: "#ebf7d4",
     main_green: "#517d0f",
@@ -15,6 +17,7 @@ const ICON_COLORS = {
     main_grey: "#a0aebd",
 };
 
+// SVG icons used in Doodle
 const ICONS = {
     globe: (
         <svg viewBox="0 0 20 20" aria-label="Globe" aria-hidden="true" width="16" height="16"><g fill="none">
@@ -50,6 +53,7 @@ const ICONS = {
     </svg>)
 };
 
+// Answering Options in left of grid
 const OptionList = (props) => {
     const listEltStyle = {
         alignItems: "center",
@@ -108,7 +112,7 @@ const OptionList = (props) => {
     )
 }
 
-// Object: { organizer: String, eventTitle: String, timeZone: String, options: { Yes, If need be, No } }
+// props: { eventOrganizer: String, eventTitle: String, timeZone: String }
 const EventMetadata = (props) => {
     return (
         <div className={'eventMetadata'}>
@@ -125,10 +129,10 @@ const EventMetadata = (props) => {
 }
 
 /**
- * 
- * @param {Date} startDate 
- * @param {Date} finishDate 
- * @returns 
+ * Helper tool for converting date object into an easier-to-work-with format
+ * @param {Date} startDate Date object for event start time
+ * @param {Date} finishDate Date object for event finish time
+ * @returns {Object} day, date, month, and hours/minutes with AM/PM
  */
 function getTimeObject(startDate, finishDate) {
     let days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -147,6 +151,11 @@ function getTimeObject(startDate, finishDate) {
     };
 }
 
+/**
+ * default styles. Have two for each possibility to account for hover/not hovered
+ * Admittedly, there is probably a better way to set this up but this is the best
+ * workaround I found so far
+ */
 const meetingOptionStyles = [
     {
         style: {
@@ -192,6 +201,10 @@ const meetingOptionStyles = [
     }
 ];
 
+/**
+ * Captures the user hovering and clicking on the meeting time, and updates
+ * colors and indicator icon accordingly
+ */
 class MeetingOption extends React.Component {
     constructor(props) {
         super(props);
@@ -263,8 +276,8 @@ class MeetingOption extends React.Component {
     }
 }
 
-function ExistingRows(props) {
-    function AvailabilityMarking(props) {
+function ExistingRows(props) { // create component for each other user's times
+    function AvailabilityMarking(props) { // the green/yellow/grey indicator in each meeting time
         return (
             <div style={{
                 ...meetingOptionStyles[props.idx * 2 + 1].style,
@@ -292,7 +305,7 @@ function ExistingRows(props) {
     )
 }
 
-// source: https://www.cluemediator.com/create-simple-popup-in-reactjs
+// popup source: https://www.cluemediator.com/create-simple-popup-in-reactjs
 const Popup = props => {
     return (
         <div className="popup-box">
@@ -304,25 +317,19 @@ const Popup = props => {
     );
 };
 
-// class GuestTimeView extends React.Component {
-//     constructor(props) {
-//         super(props);
-//         // this.state = { popupOpen: false };
-//         // console.log("GuestView:", this.state)
-//     }
+function GuestTimeView() { // using functional component to use useState hook
+    const [popupOpen, setPopupOpen] = useState(0);
+    const openPopup = () => {
 
-function GuestTimeView() {
-    const [popupOpen, setPopupOpen] = useState(false);
-    const togglePopup = () => {
-        // console.log("Popup toggled");
-        // let newstate = this.state;
-        // newstate.popupOpen = !newstate.popupOpen
-        // this.setState(newstate);
-        // this.forceUpdate();
-        setPopupOpen(!popupOpen);
+        setPopupOpen(1);
+    }
+    const closePopup = () => {
+        setPopupOpen(0);
+    }
+    const advancePopup = () => {
+        setPopupOpen(2);
     }
 
-    // render() {
     return (
         <div className={'guestTimeView'}>
             <div className={'meetingData'}>
@@ -331,7 +338,7 @@ function GuestTimeView() {
             <div className={'schedulingTool'}>
                 <h2>Select your preferred times</h2>
                 <h6 style={{ fontWeight: "normal", fontSize: "1.125rem", margin: "0px 0px 5px 0px" }}>We'll let you know when the organizer picks the best time</h6>
-                <div className={"newEntryRow"}>
+                <div className={"newEntryRow"}> {/* New person's availability entry*/}
                     <div style={{ display: "flex", alignItems: "center", minWidth: "200px", padding: "20px" }}>
                         <p className={"nameText"}>You</p>
                     </div>
@@ -341,7 +348,7 @@ function GuestTimeView() {
                         })}
                     </div>
                 </div>
-                {
+                { /* make an ExistingRows element for each other person's availability */
                     DefaultAvailability.map((elt) => {
                         return (<ExistingRows name={elt.name} availability={elt.availability} />)
                     })
@@ -354,16 +361,32 @@ function GuestTimeView() {
                     <input
                         type="button"
                         value="Submit"
-                        onClick={togglePopup}
+                        onClick={openPopup}
                     />
                 </div>
 
-                {popupOpen && <Popup
+                {/* Show the below detail registration popup only if popupOpen is set to 1 */}
+                {popupOpen === 1 && <Popup
+                    content={<div>
+                        <h3>Please fill out your details:</h3>
+                        <p>Your Name</p>
+                        <input type="text" placeholder="e.g. John Doe" style={{ minWidth: "300px" }} />
+                        <p>Your Email</p>
+                        <input type="text" placeholder="e.g. john.doe@email.com" style={{ minWidth: "300px" }} />
+                        <p></p>
+                        <input type="button" value="Back" onClick={closePopup} />
+                        <input type="button" value="Submit" onClick={advancePopup} />
+                    </div>}
+                    handleClose={closePopup}
+                />}
+
+                {/* Show the below confirmation popup only if popupOpen is set to 2 */}
+                {popupOpen === 2 && <Popup
                     content={<div>
                         <b>Your meeting availability has been saved!</b>
                         <p>Thank you for indicating your availability! An email has been sent to the organizer.</p>
                     </div>}
-                    handleClose={togglePopup}
+                    handleClose={closePopup}
                 />}
             </div>
         </div >
