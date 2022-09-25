@@ -1,6 +1,5 @@
 import logo from './logo.svg';
 import './App.css';
-import MeetingEditor from './MeetingEditor';
 import GuestTimeView from './GuestTimeView';
 
 function App() {

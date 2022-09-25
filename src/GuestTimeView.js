@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import "./css/GuestTimeView.css"
+import { DefaultMeetingTimeOptions, DefaultAvailability } from "./TIMEOPTIONS";
 
 function pad2(num) {
     return (num < 10 ? '0' : '') + num;
@@ -146,24 +147,6 @@ function getTimeObject(startDate, finishDate) {
     };
 }
 
-let timeOptions = [
-    ["Sep 25, 2022 23:30:00", "Sep 26, 2022 00:30:00"],
-    ["Sep 26, 2022 19:30:00", "Sep 26, 2022 20:30:00"],
-    ["Sep 26, 2022 20:30:00", "Sep 26, 2022 21:30:00"],
-    ["Sep 27, 2022 19:00:00", "Sep 27, 2022 20:00:00"],
-    ["Sep 27, 2022 21:15:00", "Sep 27, 2022 22:15:00"],
-    ["Sep 28, 2022 18:30:00", "Sep 28, 2022 19:30:00"],
-    ["Sep 28, 2022 21:30:00", "Sep 28, 2022 22:30:00"],
-
-    // (Date("Sep 25, 2022 23:30:00"), Date("Sep 26, 2022 00:30:00")),
-    // (Date("Sep 26, 2022 19:30:00"), Date("Sep 26, 2022 20:30:00")),
-    // (Date("Sep 26, 2022 20:30:00"), Date("Sep 26, 2022 21:30:00")),
-    // (Date("Sep 27, 2022 19:00:00"), Date("Sep 27, 2022 20:00:00")),
-    // (Date("Sep 27, 2022 21:15:00"), Date("Sep 27, 2022 22:15:00")),
-    // (Date("Sep 28, 2022 18:30:00"), Date("Sep 28, 2022 19:30:00")),
-    // (Date("Sep 28, 2022 21:30:00"), Date("Sep 28, 2022 22:30:00")),
-];
-
 const meetingOptionStyles = [
     {
         style: {
@@ -224,18 +207,19 @@ class MeetingOption extends React.Component {
     }
 
     toggleHover() {
-        console.log("Hover");
+        // console.log("Hover");
         let newstate = this.state;
         newstate.hover = !newstate.hover;
-        console.log(newstate);
+        // console.log(newstate);
         this.setState(newstate)
-        console.log(this.state.hover)
+        // console.log(this.state.hover)
     }
 
     toggleSelected() {
         let newstate = this.state;
         newstate.selected = (newstate.selected + 1) % 3;
-        console.log(newstate);
+        this.setState(newstate);
+        // console.log(newstate);
         this.forceUpdate();
     }
 
@@ -279,36 +263,112 @@ class MeetingOption extends React.Component {
     }
 }
 
-
-class GuestTimeView extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        // console.log(timeOptions[0])
+function ExistingRows(props) {
+    function AvailabilityMarking(props) {
         return (
-            <div className={'guestTimeView'}>
-                <div className={'meetingData'}>
-                    <EventMetadata eventOrganizer="Moses Mayer" eventTitle="Meeting 1" />
-                </div>
-                <div className={'schedulingTool'}>
-                    <h2>Select your preferred times</h2>
-                    <h6 style={{ fontWeight: "normal", fontSize: "1.125rem", margin: "0px 0px 5px 0px" }}>We'll let you know when the organizer picks the best time</h6>
-                    <div className={"newEntryRow"}>
-                        <div style={{ display: "flex", alignItems: "center", minWidth: "200px", padding: "20px" }}>
-                            <p className={"nameText"}>You</p>
-                        </div>
-                        <div className={"timeColumns"}>
-                            {timeOptions.map((opt) => {
-                                return <MeetingOption startDate={opt[0]} endDate={opt[1]} />
-                            })}
-                        </div>
-                    </div>
-                </div>
-            </div >
+            <div style={{
+                ...meetingOptionStyles[props.idx * 2 + 1].style,
+                display: "flex",
+                width: "100%", alignItems: "center", justifyContent: "center",
+                margin: "0 auto", borderRadius: "5px",
+            }}>
+                {meetingOptionStyles[props.idx * 2].icon}
+            </div>
         )
     }
+    return (
+        <div className={"existingEntryRow"}>
+            <div style={{ display: "flex", alignItems: "center", minWidth: "200px", padding: "20px" }}>
+                <p className={"nameText"}>{props.name}</p>
+            </div>
+            <div className={"timeColumns"} style={{ width: "100%" }}>
+                {
+                    props.availability.map((idx) => {
+                        return <AvailabilityMarking idx={idx} />
+                    })
+                }
+            </div>
+        </div>
+    )
+}
+
+// source: https://www.cluemediator.com/create-simple-popup-in-reactjs
+const Popup = props => {
+    return (
+        <div className="popup-box">
+            <div className="box">
+                <span className="close-icon" onClick={props.handleClose}>x</span>
+                {props.content}
+            </div>
+        </div>
+    );
+};
+
+// class GuestTimeView extends React.Component {
+//     constructor(props) {
+//         super(props);
+//         // this.state = { popupOpen: false };
+//         // console.log("GuestView:", this.state)
+//     }
+
+function GuestTimeView() {
+    const [popupOpen, setPopupOpen] = useState(false);
+    const togglePopup = () => {
+        // console.log("Popup toggled");
+        // let newstate = this.state;
+        // newstate.popupOpen = !newstate.popupOpen
+        // this.setState(newstate);
+        // this.forceUpdate();
+        setPopupOpen(!popupOpen);
+    }
+
+    // render() {
+    return (
+        <div className={'guestTimeView'}>
+            <div className={'meetingData'}>
+                <EventMetadata eventOrganizer="Moses Mayer" eventTitle="Meeting 1" />
+            </div>
+            <div className={'schedulingTool'}>
+                <h2>Select your preferred times</h2>
+                <h6 style={{ fontWeight: "normal", fontSize: "1.125rem", margin: "0px 0px 5px 0px" }}>We'll let you know when the organizer picks the best time</h6>
+                <div className={"newEntryRow"}>
+                    <div style={{ display: "flex", alignItems: "center", minWidth: "200px", padding: "20px" }}>
+                        <p className={"nameText"}>You</p>
+                    </div>
+                    <div className={"timeColumns"}>
+                        {DefaultMeetingTimeOptions.map((opt) => {
+                            return <MeetingOption startDate={opt[0]} endDate={opt[1]} />
+                        })}
+                    </div>
+                </div>
+                {
+                    DefaultAvailability.map((elt) => {
+                        return (<ExistingRows name={elt.name} availability={elt.availability} />)
+                    })
+                }
+                <div style={{
+                    display: "flex", flexDirection: "row-reverse", alignItems: "center",
+                    padding: "20px"
+                }}
+                >
+                    <input
+                        type="button"
+                        value="Submit"
+                        onClick={togglePopup}
+                    />
+                </div>
+
+                {popupOpen && <Popup
+                    content={<div>
+                        <b>Your meeting availability has been saved!</b>
+                        <p>Thank you for indicating your availability! An email has been sent to the organizer.</p>
+                    </div>}
+                    handleClose={togglePopup}
+                />}
+            </div>
+        </div >
+    )
+    // }
 }
 
 export default GuestTimeView;
