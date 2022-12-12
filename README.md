@@ -1,6 +1,7 @@
 # Doodle Minimum User-Testable Implementation
 
-Use `npm start` to run.
+Before running, use `npm install` to install required dependencies.
+Use `npm start` to run (will be hosted on localhost)
 
 The key distinguishing features I noted/implemented are as follows:
 - Times are presented as individual blocks, as opposed to a UI where you drag across time blocks to indicate availabilty
